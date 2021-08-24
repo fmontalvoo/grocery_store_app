@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:grocery_store_app/src/bloc/grocery_store_bloc.dart';
 
-const _backgroundColor = Color(0xFFF6F5F2);
-const _cartBarHeight = 120.0;
+import 'package:grocery_store_app/src/bloc/grocery_store_bloc.dart';
+import 'package:grocery_store_app/src/providers/grocery_provider.dart';
+
+import 'package:grocery_store_app/src/widgets/grocery_store_list.dart';
+
+const backgroundColor = Color(0xFFF6F5F2);
+const cartBarHeight = 120.0;
 const _panelTransition = Duration(milliseconds: 500);
 
 class HomePage extends StatefulWidget {
@@ -11,12 +15,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final bloc = GroceryStoreBLoC();
+  GroceryStoreBLoC bloc;
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
+    bloc = GroceryProvider.of(context).bloc;
     return AnimatedBuilder(
         animation: bloc,
         builder: (context, _) {
@@ -35,13 +39,14 @@ class _HomePageState extends State<HomePage> {
                         right: 0.0,
                         top: _getTopForWhitePanel(bloc.state, size),
                         height: size.height - kToolbarHeight,
-                        child: Container(
-                          decoration: BoxDecoration(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(30.0),
+                            bottomRight: Radius.circular(30.0),
+                          ),
+                          child: Container(
                             color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(30.0),
-                              bottomRight: Radius.circular(30.0),
-                            ),
+                            child: GroceryStoreList(),
                           ),
                         ),
                       ),
@@ -79,16 +84,16 @@ class _HomePageState extends State<HomePage> {
 
   double _getTopForWhitePanel(GroceryState state, Size size) {
     if (state == GroceryState.normal)
-      return -_cartBarHeight;
+      return -cartBarHeight;
     else if (state == GroceryState.cart)
-      return -(size.height - kToolbarHeight - _cartBarHeight / 2);
+      return -(size.height - kToolbarHeight - cartBarHeight / 2);
     return 0.0;
   }
 
   double _getTopForBlackPanel(GroceryState state, Size size) {
     if (state == GroceryState.normal)
-      return size.height - kToolbarHeight - _cartBarHeight;
-    else if (state == GroceryState.cart) return _cartBarHeight / 2;
+      return size.height - kToolbarHeight - cartBarHeight;
+    else if (state == GroceryState.cart) return cartBarHeight / 2;
     return 0.0;
   }
 }
@@ -103,7 +108,7 @@ class _AppBarGrocery extends StatelessWidget {
     return SafeArea(
       child: Container(
         height: kToolbarHeight,
-        color: _backgroundColor,
+        color: backgroundColor,
         child: Row(
           children: [
             BackButton(
