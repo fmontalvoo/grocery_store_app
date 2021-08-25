@@ -29,6 +29,7 @@ class GroceryStoreList extends StatelessWidget {
           return GestureDetector(
             onTap: () {
               Navigator.of(context).push(PageRouteBuilder(
+                transitionDuration: const Duration(milliseconds: 700),
                 pageBuilder: (context, animation, __) {
                   return FadeTransition(
                     opacity: animation,

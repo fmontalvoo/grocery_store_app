@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:grocery_store_app/src/bloc/grocery_store_bloc.dart';
 import 'package:grocery_store_app/src/providers/grocery_provider.dart';
+
+import 'package:grocery_store_app/src/bloc/grocery_store_bloc.dart';
+
+import 'package:grocery_store_app/src/widgets/grocery_store_cart.dart';
 
 import 'package:grocery_store_app/src/widgets/grocery_store_list.dart';
 
@@ -52,57 +55,8 @@ class _HomePageState extends State<HomePage> {
                   left: 0.0,
                   right: 0.0,
                   top: _getTopForBlackPanel(bloc.state, size),
-                  height: size.height,
-                  child: GestureDetector(
-                    onVerticalDragUpdate: _onVerticalGesture,
-                    child: Container(
-                      color: Colors.black,
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(20.0),
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Carrito',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    fontSize: 20.0,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      children: List.generate(
-                                        bloc.cart.length,
-                                        (index) => Hero(
-                                          tag:
-                                              'ID_${bloc.cart[index].product.id}_details',
-                                          child: CircleAvatar(
-                                            backgroundColor: Colors.white,
-                                            backgroundImage: AssetImage(
-                                              bloc.cart[index].product.image,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                CircleAvatar(
-                                  backgroundColor: Colors.amber,
-                                )
-                              ],
-                            ),
-                          ),
-                          Spacer(),
-                          Placeholder(),
-                        ],
-                      ),
-                    ),
-                  ),
+                  height: size.height - kToolbarHeight,
+                  child: _blackPanel(),
                 ),
                 AnimatedPositioned(
                   duration: _panelTransition,
@@ -116,6 +70,97 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         });
+  }
+
+  Widget _blackPanel() {
+    return GestureDetector(
+      onVerticalDragUpdate: _onVerticalGesture,
+      child: Container(
+        color: Colors.black,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(20.0),
+              child: AnimatedSwitcher(
+                duration: _panelTransition,
+                child: bloc.state == GroceryState.normal
+                    ? SizedBox(
+                        height: kToolbarHeight,
+                        child: Row(
+                          children: [
+                            Text(
+                              'Carrito',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 20.0,
+                              ),
+                            ),
+                            _cartItems(),
+                            CircleAvatar(
+                              backgroundColor: Colors.amber,
+                              child: Text(
+                                bloc.countCartElements().toString(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ),
+            Expanded(child: GroceryStoreCart()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Expanded _cartItems() {
+    return Expanded(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: List.generate(
+            bloc.cart.length,
+            (index) => Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 7.0,
+              ),
+              child: Stack(
+                children: [
+                  Hero(
+                    tag: 'ID_${bloc.cart[index].product.id}_details',
+                    child: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      backgroundImage: AssetImage(
+                        bloc.cart[index].product.image,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    child: CircleAvatar(
+                      radius: 10.0,
+                      backgroundColor: Colors.green,
+                      child: Text(
+                        bloc.cart[index].quantity.toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _onVerticalGesture(DragUpdateDetails details) {
