@@ -15,7 +15,7 @@ class GroceryStoreList extends StatelessWidget {
     return Container(
       color: backgroundColor,
       padding: const EdgeInsets.only(
-        top: cartBarHeight,
+        top: cartBarHeight + 25.0,
         left: 10.0,
         right: 10.0,
       ),
@@ -34,6 +34,9 @@ class GroceryStoreList extends StatelessWidget {
                     opacity: animation,
                     child: GroceryDetailPage(
                       product: product,
+                      onProductAdded: () {
+                        bloc.addProduct(product);
+                      },
                     ),
                   );
                 },
@@ -81,7 +84,7 @@ class _ProductItem extends StatelessWidget {
           children: [
             Expanded(
               child: Hero(
-                tag: product.id,
+                tag: 'ID_${product.id}',
                 child: Image.asset(
                   product.image,
                   fit: BoxFit.contain,

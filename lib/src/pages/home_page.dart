@@ -6,7 +6,7 @@ import 'package:grocery_store_app/src/providers/grocery_provider.dart';
 import 'package:grocery_store_app/src/widgets/grocery_store_list.dart';
 
 const backgroundColor = Color(0xFFF6F5F2);
-const cartBarHeight = 120.0;
+const cartBarHeight = 100.0;
 const _panelTransition = Duration(milliseconds: 500);
 
 class HomePage extends StatefulWidget {
@@ -26,46 +26,91 @@ class _HomePageState extends State<HomePage> {
         builder: (context, _) {
           return Scaffold(
             backgroundColor: Colors.black,
-            body: Column(
+            body: Stack(
               children: [
-                _AppBarGrocery(),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      AnimatedPositioned(
-                        duration: _panelTransition,
-                        curve: Curves.decelerate,
-                        left: 0.0,
-                        right: 0.0,
-                        top: _getTopForWhitePanel(bloc.state, size),
-                        height: size.height - kToolbarHeight,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(30.0),
-                            bottomRight: Radius.circular(30.0),
-                          ),
-                          child: Container(
-                            color: Colors.white,
-                            child: GroceryStoreList(),
-                          ),
-                        ),
-                      ),
-                      AnimatedPositioned(
-                        duration: _panelTransition,
-                        curve: Curves.decelerate,
-                        left: 0.0,
-                        right: 0.0,
-                        top: _getTopForBlackPanel(bloc.state, size),
-                        height: size.height,
-                        child: GestureDetector(
-                          onVerticalDragUpdate: _onVerticalGesture,
-                          child: Container(
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ],
+                AnimatedPositioned(
+                  duration: _panelTransition,
+                  curve: Curves.decelerate,
+                  left: 0.0,
+                  right: 0.0,
+                  top: _getTopForWhitePanel(bloc.state, size),
+                  height: size.height - kToolbarHeight,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(30.0),
+                      bottomRight: Radius.circular(30.0),
+                    ),
+                    child: Container(
+                      color: Colors.white,
+                      child: GroceryStoreList(),
+                    ),
                   ),
+                ),
+                AnimatedPositioned(
+                  duration: _panelTransition,
+                  curve: Curves.decelerate,
+                  left: 0.0,
+                  right: 0.0,
+                  top: _getTopForBlackPanel(bloc.state, size),
+                  height: size.height,
+                  child: GestureDetector(
+                    onVerticalDragUpdate: _onVerticalGesture,
+                    child: Container(
+                      color: Colors.black,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Carrito',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontSize: 20.0,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: List.generate(
+                                        bloc.cart.length,
+                                        (index) => Hero(
+                                          tag:
+                                              'ID_${bloc.cart[index].product.id}_details',
+                                          child: CircleAvatar(
+                                            backgroundColor: Colors.white,
+                                            backgroundImage: AssetImage(
+                                              bloc.cart[index].product.image,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                CircleAvatar(
+                                  backgroundColor: Colors.amber,
+                                )
+                              ],
+                            ),
+                          ),
+                          Spacer(),
+                          Placeholder(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                AnimatedPositioned(
+                  duration: _panelTransition,
+                  curve: Curves.decelerate,
+                  left: 0.0,
+                  right: 0.0,
+                  top: _getTopForAppBar(bloc.state),
+                  child: _AppBarGrocery(),
                 ),
               ],
             ),
@@ -84,15 +129,22 @@ class _HomePageState extends State<HomePage> {
 
   double _getTopForWhitePanel(GroceryState state, Size size) {
     if (state == GroceryState.normal)
-      return -cartBarHeight;
+      return -cartBarHeight + kToolbarHeight;
     else if (state == GroceryState.cart)
       return -(size.height - kToolbarHeight - cartBarHeight / 2);
     return 0.0;
   }
 
+  double _getTopForAppBar(GroceryState state) {
+    if (state == GroceryState.normal)
+      return 0.0;
+    else if (state == GroceryState.cart) return -cartBarHeight;
+    return 0.0;
+  }
+
   double _getTopForBlackPanel(GroceryState state, Size size) {
     if (state == GroceryState.normal)
-      return size.height - kToolbarHeight - cartBarHeight;
+      return size.height - cartBarHeight;
     else if (state == GroceryState.cart) return cartBarHeight / 2;
     return 0.0;
   }
